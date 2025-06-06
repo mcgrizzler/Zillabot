@@ -1,21 +1,27 @@
-import discord
-import re
-import os
-import sqlite3
-import requests
-from bs4 import BeautifulSoup
-from cryptography.fernet import Fernet
+# Zillabot.py
+# A Discord bot that detects Zillow links in messages and then fetches property details
+#
+# Date: June 5th, 2024
+# Author: Matt G
 
-intents = discord.Intents.default()
-intents.message_content = True
+# Library Import
+import discord # Discord.py
+import re # Hieroglyphics
+import sqlite3 # Database stuff
+import requests # Web requests stuff
+from bs4 import BeautifulSoup # Web data parsing stuff
 
+# Define bot intents (These are what the bot can do based of discord dev portal)
+intents = discord.Intents.default() # Include default intents
+intents.message_content = True # Needs message content to see messages
+
+# Loads discord token from token.dat file so that it's not hardcoded in the script
 def load_token_from_file(token_file_path: str) -> str:
-    """
-    Loads the Discord bot token from a file.
-    """
     with open(token_file_path, "r") as token_file:
         return token_file.readline().strip()
 
+# Initializes the database and creates the properties table if it doesn't exist
+# SQLite!
 def init_db(db_path="Data/zillow_properties.db"):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -33,6 +39,7 @@ def init_db(db_path="Data/zillow_properties.db"):
     conn.commit()
     conn.close()
 
+# Save property info to the database
 def save_property_to_db(url, name, price, size, hospital_name, hospital_distance_miles, db_path="Data/zillow_properties.db"):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -43,8 +50,10 @@ def save_property_to_db(url, name, price, size, hospital_name, hospital_distance
     conn.commit()
     conn.close()
 
+# Fetch property details from Zillow
 def get_property_details_from_zillow(url):
     try:
+        # Use Mozilla user agent to avoid zillow bot detection
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -71,8 +80,7 @@ def get_property_details_from_zillow(url):
         size_tag = soup.find(string=re.compile(r"[\d,]+ ?sqft"))
         if size_tag:
             size = size_tag.strip()
-        # Address: use the name value, spliced up to the 3rd space, plus the last word (zip), omit commas and anything after '|'
-        address = None
+        # Address
         if name:
             # Remove anything after a pipe and all commas
             clean_name = name.split('|')[0].replace(",", "").strip()
@@ -87,6 +95,8 @@ def get_property_details_from_zillow(url):
     except Exception as e:
         return f"Error fetching property: {e}", "Unknown", "Unknown", None
 
+# Find the nearest hospital using OpenStreetMap Nominatim and Overpass API
+# Thanks chatgpt
 def get_nearest_hospital(address):
     """
     Uses OpenStreetMap Nominatim and Overpass API to find the nearest full-service hospital (with emergency).
@@ -187,7 +197,9 @@ class ZillowBot(discord.Client):
                 f"Nearest hospital: {hospital_name or 'Unknown'} ({hospital_distance_miles if hospital_distance_miles is not None else '?'} miles)"
             )
 
+# Just normal main function stuff
 if __name__ == "__main__":
+    # Try to load the token, complain if can't
     try:
         TOKEN = load_token_from_file("Data/token.dat")
     except Exception as e:
@@ -197,5 +209,7 @@ if __name__ == "__main__":
     if not TOKEN:
         print("Please create a file named 'token.dat' with your Discord bot token on the first line.")
     else:
+        # Run the bot 😎
         client = ZillowBot(intents=intents)
         client.run(TOKEN)
+        
