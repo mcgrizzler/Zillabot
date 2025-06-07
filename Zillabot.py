@@ -176,6 +176,7 @@ def get_nearest_hospital(address):
         print(f"Hospital lookup error: {e}")
     return hospital_name, hospital_distance_miles
 
+# ZillowBot Class Declaration
 class ZillowBot(discord.Client):
     async def on_ready(self):
         print(f'Logged in as {self.user}')
