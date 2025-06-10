@@ -4,3 +4,6 @@ __pycache__/
 *.dat
 *.db
 Data/zillow_properties.db
+Data/token.dat
+Data/.DS_Store
+.DS_Store
