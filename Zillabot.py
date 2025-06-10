@@ -1,4 +1,4 @@
-# Zillabot.py
+# Zillabot.py 
 # A Discord bot that detects Zillow links in messages and then fetches property details
 #
 # Date: June 5th, 2024

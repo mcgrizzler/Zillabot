@@ -8,5 +8,5 @@ Discord bot that researches properties that are linked in chat.
 
 # Installation
 - Create a python environment and install required packages
-- Update the Token to a working token in token.dat
+- Update the Token to a working token in token.dat (There is a sample token in the file to show how to format the Token)
 - run python Zillabot.py
